@@ -4,16 +4,13 @@ import '../global.css';
 import './index.css';
 
 // TODO nezapomeňte nastavit svůj login – jednoznačný identifikátor (třeba název účtu na GitHubu)
-//const login = ""
+const login = 'jficz';
 
-const response = await fetch(
-  'https://nakupy.czechitas.dev/api/mon',
-  {
-    headers: {
-      Authorization: login,
-    },
+const response = await fetch('https://nakupy.czechitas.dev/api/mon', {
+  headers: {
+    Authorization: login,
   },
-);
+});
 const list = await response.json();
 
 const HomePage = () => (
@@ -31,8 +28,9 @@ const HomePage = () => (
       </form>
       <div className="shoplist">
         {list.map((item) => (
-          <ShopItem 
+          <ShopItem
             key={item.id}
+            //            id={item.id}
             name={item.product}
             amount={item.amount + ' ' + item.unit}
             bought={item.done}
@@ -45,7 +43,25 @@ const HomePage = () => (
 
 document.querySelector('#root').innerHTML = render(<HomePage />);
 
-document.querySelector('.newitem-form')
+const handleDelete = async (e) => {
+  //https://nakupy.czechitas.dev/api/:day/:id
+  const itemId = e.target.parentElement.id;
+  await fetch(`https://nakupy.czechitas.dev/api/mon/${itemId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: login,
+    },
+    //body: JSON.stringify(body),
+  });
+
+  window.location.reload();
+};
+document.querySelectorAll('.btn-delete').forEach((item) => {
+  item.addEventListener('click', handleDelete);
+});
+document
+  .querySelector('.newitem-form')
   .addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -60,18 +76,15 @@ document.querySelector('.newitem-form')
       done: false,
     };
 
-    await fetch(
-      'https://nakupy.czechitas.dev/api/mon',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: login,
-        },
-        body: JSON.stringify(body),
+    await fetch('https://nakupy.czechitas.dev/api/mon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: login,
       },
-    );
+      body: JSON.stringify(body),
+    });
 
     window.location.reload();
-  }
-);
+  });
+console.log(list);
